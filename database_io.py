@@ -1,6 +1,8 @@
 from db_utils import db_connect
 from datetime import datetime
 import json
+import gviz_api
+import pprint
 ENVIRONMENT_SETTINGS_TABLE = 'env_settings'
 
 def read_temperature_settings():
@@ -81,10 +83,10 @@ def read_environment_values_from_database():
     cursor = con.cursor()
     query = f"SELECT * FROM environment_values WHERE ID = (SELECT Max(ID) FROM environment_values)"
     cursor.execute(query)
-    _, temperature, humidity, pressure, moisture, _ = cursor.fetchone()
-    return temperature, humidity, pressure, moisture
+    _, temperature, humidity, pressure, moisture, datetime = cursor.fetchone()
+    return temperature, humidity, pressure, moisture, datetime
 
-def read_environment_values_from_last_3_days():
+def read_environment_temp_values_from_last_3_days():
     con = db_connect()
     cursor = con.cursor()
     query =  f"SELECT * FROM environment_values WHERE datetime BETWEEN DATETIME('now', '-3 day') AND DATETIME('now')"
@@ -93,16 +95,80 @@ def read_environment_values_from_last_3_days():
     environment_records = []
     for row in records:
         environment_records.append({
-                'datatime' : row[1],
-                'temperature' : row[5]
-                })
-    environment_data = json.dumps({'environment_records':environment_records})
-    
-    return environment_data
-    #    print("Id: ", row[0])
-    #    print("temperature: ", row[1])
-    #    print("humidity: ", row[2])
-    #    print("pressure: ", row[3])
-    #    print("moisture ", row[4])
-    #    print("datetime: ", row[5])
-    #    print("\n")
+            "c":[{"v":row[5]},
+            {"v":row[1]}]
+            })
+    environment_data = environment_records
+    payload = {}
+    payload["cols"] =[{"type": "string", "label": "Time"},{"type":"number", "label":"Temperature"}]
+    payload["rows"] = environment_data
+   # pp = pprint.PrettyPrinter()
+   # pp.pprint(payload)
+    return payload
+
+
+def read_environment_all_values_from_last_1_days():
+    con = db_connect()
+    cursor = con.cursor()
+    query =  f"SELECT * FROM environment_values WHERE datetime BETWEEN DATETIME('now', '-1 day') AND DATETIME('now')"
+    cursor.execute(query)
+    records = cursor.fetchall()
+    environment_records = []
+    for row in records:
+        environment_records.append({
+            "c":[{"v":row[5]},
+                {"v":row[1]},
+                {"v":row[2]}]
+            })
+    environment_data = environment_records
+    payload = {}
+    payload["cols"] =[{"type": "string", "label": "Time"},{"type":"number", "label":"Temperature"},{"type": "number", "label": "Humidity"}]
+    payload["rows"] = environment_data
+   # pp = pprint.PrettyPrinter()
+   # pp.pprint(payload)
+    return payload 
+
+def read_environment_all_values_from_last_3_days():
+    con = db_connect()
+    cursor = con.cursor()
+    query =  f"SELECT * FROM environment_values WHERE datetime BETWEEN DATETIME('now', '-3 day') AND DATETIME('now')"
+    cursor.execute(query)
+    records = cursor.fetchall()
+    environment_records = []
+    for row in records:
+        environment_records.append({
+            "c":[{"v":row[5]},
+                {"v":row[1]},
+                {"v":row[2]}]
+            })
+    environment_data = environment_records
+    payload = {}
+    payload["cols"] =[{"type": "string", "label": "Time"},{"type":"number", "label":"Temperature"},{"type": "number", "label": "Humidity"}]
+    payload["rows"] = environment_data
+   # pp = pprint.PrettyPrinter()
+   # pp.pprint(payload)
+    return payload 
+
+def read_environment_all_values_from_last_7_days():
+    con = db_connect()
+    cursor = con.cursor()
+    query =  f"SELECT * FROM environment_values WHERE datetime BETWEEN DATETIME('now', '-7 day') AND DATETIME('now')"
+    cursor.execute(query)
+    records = cursor.fetchall()
+    environment_records = []
+    for row in records:
+        environment_records.append({
+            "c":[{"v":row[5]},
+                {"v":row[1]},
+                {"v":row[2]}]
+            })
+    environment_data = environment_records
+    payload = {}
+    payload["cols"] =[{"type": "string", "label": "Time"},{"type":"number", "label":"Temperature"},{"type": "number", "label": "Humidity"}]
+    payload["rows"] = environment_data
+   # pp = pprint.PrettyPrinter()
+   # pp.pprint(payload)
+    return payload 
+
+
+

@@ -9,7 +9,7 @@ import struct
 import json
 import transform
 import database_io
-
+import gviz_api
 app = Flask(__name__)
 
 
@@ -23,7 +23,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/lights/')
+@app.route('/environment/')
 def lights():
     # start, stop= transform.wght_settings_views()
     min_temperature, max_temperature, start, stop = transform.update_env_settings()
@@ -34,7 +34,12 @@ def lights():
         'min_temperature':int(min_temperature),
         'max_temperature':int(max_temperature)
     }
-    return render_template('lights.html', env_settings=env_settings)
+    return render_template('environment.html', env_settings=env_settings)
+
+@app.route('/charts/')
+def data():
+    return render_template('charts.html')
+
 
 
 @app.route('/temperature/')
@@ -44,8 +49,8 @@ def temperature():
 
 @app.route('/feed')
 def ENVdata():
-    temperature, humidity, pressure, moisture = transform.update_environment_values_views()
-    return jsonify(temperature=temperature, humidity=humidity, pressure=pressure, moisture=moisture)
+    temperature, humidity, pressure, moisture, datetime = transform.update_environment_values_views()
+    return jsonify(temperature=temperature, humidity=humidity, pressure=pressure, moisture=moisture, datetime=datetime)
 
 # @app.route('/_display-light')
 # def display_light_settings():
@@ -94,16 +99,41 @@ def httpTemps():
     print(pressure)
     moisture = content['environment'][3]
     print(moisture)
-    database_io.write_environment_values_to_database(temperature, humidity, pressure, moisture)
+    if (temperature == ""):
+        print("not writing data to database because values are invalid")
+    else:
+        database_io.write_environment_values_to_database(temperature, humidity, pressure, moisture)
    # print(lights)
     return jsonify(min_temperature=min_temperature,max_temperature= max_temperature,lights=lights)
 
 
-@app.route('/charts')
-def charts(): 
-    environment_data =  database_io.read_environment_values_from_last_3_days()
-    print(environment_data)
-    return environment_data
+@app.route('/chart01')
+def chart01(): 
+    environment_data =  database_io.read_environment_temp_values_from_last_3_days()
+    data_table = json.dumps(environment_data)
+    return data_table
+
+
+@app.route('/chart02')
+def chart02(): 
+    environment_data =  database_io.read_environment_all_values_from_last_1_days()
+    data_table = json.dumps(environment_data)
+    return data_table
+
+
+@app.route('/chart03')
+def chart03(): 
+    environment_data =  database_io.read_environment_all_values_from_last_3_days()
+    data_table = json.dumps(environment_data)
+    return data_table
+
+@app.route('/chart04')
+def chart04(): 
+    environment_data =  database_io.read_environment_all_values_from_last_7_days()
+    data_table = json.dumps(environment_data)
+    return data_table
+
+
 
 
 def gen(camera):

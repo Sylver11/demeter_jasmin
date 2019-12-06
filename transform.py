@@ -15,8 +15,8 @@ def display_light_settings_views():
 
 
 def update_environment_values_views():
-    temperature, humidity, pressure, moisture = database_io.read_environment_values_from_database()
-    return temperature, humidity, pressure, moisture 
+    temperature, humidity, pressure, moisture, datetime = database_io.read_environment_values_from_database()
+    return temperature, humidity, pressure, moisture, datetime 
 
 
 
